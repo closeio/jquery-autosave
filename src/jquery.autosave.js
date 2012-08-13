@@ -135,7 +135,8 @@
         changed: "changed",
         modified: "modified",
         ignore: "ignore"
-      }
+      },
+      delay: 0
     },
 
     /**
@@ -156,7 +157,8 @@
       $.extend(this, {
         context: $elements.context || document,
         selector: $elements.selector || $elements,
-        options: $.extend(true, {}, this.options, options)
+        options: $.extend(true, {}, this.options, options),
+        delayPassed: true  // initialize to true for the sake of first save
       });
 
       // If length == 0, we have no forms or inputs
@@ -398,7 +400,11 @@
             )) !== false;
           });
 
-          if (passes) {
+          if (passes && this.delayPassed) {
+            this.delayPassed = false;
+            setTimeout($.proxy(function() {
+                this.delayPassed = true;
+            }, this), this.options.delay);
             // Add all of our save methods to the queue
             $.each(this.options.callbacks.save, function(i, save) {
               self.$queues.queue("save", function() {
